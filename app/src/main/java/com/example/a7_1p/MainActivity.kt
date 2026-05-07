@@ -35,12 +35,17 @@ class MainActivity : ComponentActivity() {
                             ListingScreen(
                                 onCreatePostClick = {
                                     navController.navigate(AppScreen.CreatePost.route)
+                                },
+                                onItemClick = { itemId ->
+                                    navController.navigate("detail/$itemId")
                                 }
                             )
                         }
 
                         composable(AppScreen.CreatePost.route) {
-                            CreatePostScreen()
+                            CreatePostScreen(onPostSaved = {
+                                navController.popBackStack()
+                            })
                         }
 
                         composable(

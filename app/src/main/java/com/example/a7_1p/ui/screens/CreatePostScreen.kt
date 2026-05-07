@@ -29,13 +29,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.a7_1p.data.LostFoundDatabaseHelper
+import com.example.a7_1p.data.LostFoundItem
 
 private val categories = listOf("Electronics", "Pets", "Wallets", "Keys", "Other")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreatePostScreen() {
+fun CreatePostScreen(onPostSaved: () -> Unit) {
     val context = LocalContext.current
+    val databaseHelper = remember { LostFoundDatabaseHelper(context) }
 
     var type by rememberSaveable { mutableStateOf("Lost") }
     var name by rememberSaveable { mutableStateOf("") }
@@ -174,7 +177,19 @@ fun CreatePostScreen() {
                 if (hasErrors) {
                     Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()
                 } else {
+                    val item = LostFoundItem(
+                        type = type,
+                        name = name,
+                        phone = phone,
+                        description = description,
+                        date = date,
+                        location = location,
+                        category = category,
+                        imageUri = imageUri
+                    )
+                    databaseHelper.insertItem(item)
                     Toast.makeText(context, "Post saved", Toast.LENGTH_SHORT).show()
+                    onPostSaved()
                 }
             },
             modifier = Modifier.fillMaxWidth()
