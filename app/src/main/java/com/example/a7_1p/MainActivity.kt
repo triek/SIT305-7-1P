@@ -5,12 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.a7_1p.navigation.AppScreen
+import com.example.a7_1p.ui.screens.CreatePostScreen
+import com.example.a7_1p.ui.screens.ItemDetailScreen
+import com.example.a7_1p.ui.screens.ListingScreen
 import com.example.a7_1p.ui.theme._71PTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +24,38 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             _71PTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+
+                Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = AppScreen.Listing.route
+                    ) {
+                        composable(AppScreen.Listing.route) {
+                            ListingScreen(
+                                onCreatePostClick = {
+                                    navController.navigate(AppScreen.CreatePost.route)
+                                }
+                            )
+                        }
+
+                        composable(AppScreen.CreatePost.route) {
+                            CreatePostScreen()
+                        }
+
+                        composable(
+                            route = AppScreen.Detail.route,
+                            arguments = listOf(navArgument(AppScreen.Detail.ARG_ITEM_ID) {
+                                type = NavType.LongType
+                            })
+                        ) { backStackEntry ->
+                            val itemId = backStackEntry.arguments?.getLong(AppScreen.Detail.ARG_ITEM_ID)
+                                ?: 0L
+                            ItemDetailScreen(itemId = itemId)
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    _71PTheme {
-        Greeting("Android")
     }
 }
