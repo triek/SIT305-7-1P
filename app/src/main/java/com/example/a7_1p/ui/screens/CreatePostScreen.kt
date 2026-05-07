@@ -1,11 +1,17 @@
 package com.example.a7_1p.ui.screens
 
+import android.net.Uri
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.example.a7_1p.R
 import com.example.a7_1p.data.LostFoundDatabaseHelper
 import com.example.a7_1p.data.LostFoundItem
 
@@ -49,24 +57,17 @@ fun CreatePostScreen(onPostSaved: () -> Unit) {
     var category by rememberSaveable { mutableStateOf(categories.first()) }
     var imageUri by rememberSaveable { mutableStateOf("") }
     var categoryExpanded by remember { mutableStateOf(false) }
-
     var showErrors by rememberSaveable { mutableStateOf(false) }
 
-    val isNameError = showErrors && name.isBlank()
-    val isPhoneError = showErrors && phone.isBlank()
-    val isDescriptionError = showErrors && description.isBlank()
-    val isDateError = showErrors && date.isBlank()
-    val isLocationError = showErrors && location.isBlank()
+    val pickMediaLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        imageUri = uri?.toString().orEmpty()
+    }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Create Lost/Found Post", style = MaterialTheme.typography.headlineSmall)
-
         Text("Type", style = MaterialTheme.typography.titleMedium)
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(selected = type == "Lost", onClick = { type = "Lost" })
@@ -74,127 +75,45 @@ fun CreatePostScreen(onPostSaved: () -> Unit) {
             RadioButton(selected = type == "Found", onClick = { type = "Found" })
             Text("Found")
         }
+        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Item name*") }, isError = showErrors && name.isBlank(), modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Phone number*") }, isError = showErrors && phone.isBlank(), modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Description*") }, isError = showErrors && description.isBlank(), modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = date, onValueChange = { date = it }, label = { Text("Date/Time*") }, placeholder = { Text("e.g. 2026-05-07 14:30") }, isError = showErrors && date.isBlank(), modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = location, onValueChange = { location = it }, label = { Text("Location*") }, isError = showErrors && location.isBlank(), modifier = Modifier.fillMaxWidth())
 
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Item name*") },
-            isError = isNameError,
-            supportingText = {
-                if (isNameError) Text("Name is required")
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = phone,
-            onValueChange = { phone = it },
-            label = { Text("Phone number*") },
-            isError = isPhoneError,
-            supportingText = {
-                if (isPhoneError) Text("Phone is required")
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = description,
-            onValueChange = { description = it },
-            label = { Text("Description*") },
-            isError = isDescriptionError,
-            supportingText = {
-                if (isDescriptionError) Text("Description is required")
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = date,
-            onValueChange = { date = it },
-            label = { Text("Date*") },
-            placeholder = { Text("e.g. 2026-05-07") },
-            isError = isDateError,
-            supportingText = {
-                if (isDateError) Text("Date is required")
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = location,
-            onValueChange = { location = it },
-            label = { Text("Location*") },
-            isError = isLocationError,
-            supportingText = {
-                if (isLocationError) Text("Location is required")
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        ExposedDropdownMenuBox(
-            expanded = categoryExpanded,
-            onExpandedChange = { categoryExpanded = !categoryExpanded }
-        ) {
-            OutlinedTextField(
-                value = category,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Category") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-            )
-            ExposedDropdownMenu(
-                expanded = categoryExpanded,
-                onDismissRequest = { categoryExpanded = false }
-            ) {
+        ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = { categoryExpanded = !categoryExpanded }) {
+            OutlinedTextField(value = category, onValueChange = {}, readOnly = true, label = { Text("Category") }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) }, modifier = Modifier.menuAnchor().fillMaxWidth())
+            ExposedDropdownMenu(expanded = categoryExpanded, onDismissRequest = { categoryExpanded = false }) {
                 categories.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option) },
-                        onClick = {
-                            category = option
-                            categoryExpanded = false
-                        }
-                    )
+                    DropdownMenuItem(text = { Text(option) }, onClick = { category = option; categoryExpanded = false })
                 }
             }
         }
 
-        OutlinedButton(
-            onClick = { imageUri = "selected-image-placeholder" },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (imageUri.isBlank()) "Pick an image" else "Image selected")
+        OutlinedButton(onClick = {
+            pickMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text(if (imageUri.isBlank()) "Pick an image" else "Change image")
         }
 
-        Button(
-            onClick = {
-                showErrors = true
-                val hasErrors = name.isBlank() || phone.isBlank() || description.isBlank() ||
-                    date.isBlank() || location.isBlank()
-
-                if (hasErrors) {
-                    Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()
-                } else {
-                    val item = LostFoundItem(
-                        type = type,
-                        name = name,
-                        phone = phone,
-                        description = description,
-                        date = date,
-                        location = location,
-                        category = category,
-                        imageUri = imageUri
-                    )
-                    databaseHelper.insertItem(item)
-                    Toast.makeText(context, "Post saved", Toast.LENGTH_SHORT).show()
-                    onPostSaved()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Save")
+        if (imageUri.isNotBlank()) {
+            AndroidView(
+                factory = { ctx -> ImageView(ctx).apply { scaleType = ImageView.ScaleType.CENTER_CROP } },
+                update = { imageView -> imageView.setImageURI(Uri.parse(imageUri)) },
+                modifier = Modifier.fillMaxWidth().height(200.dp)
+            )
         }
+
+        Button(onClick = {
+            showErrors = true
+            val hasErrors = name.isBlank() || phone.isBlank() || description.isBlank() || date.isBlank() || location.isBlank()
+            if (hasErrors) {
+                Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()
+            } else {
+                databaseHelper.insertItem(LostFoundItem(type = type, name = name, phone = phone, description = description, date = date, location = location, category = category, imageUri = imageUri))
+                Toast.makeText(context, "Post saved", Toast.LENGTH_SHORT).show()
+                onPostSaved()
+            }
+        }, modifier = Modifier.fillMaxWidth()) { Text("Save") }
     }
 }

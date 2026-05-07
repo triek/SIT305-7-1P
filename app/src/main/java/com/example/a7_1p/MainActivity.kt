@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate(AppScreen.CreatePost.route)
                                 },
                                 onItemClick = { itemId ->
-                                    navController.navigate("detail/$itemId")
+                                    navController.navigate(AppScreen.Detail.createRoute(itemId))
                                 }
                             )
                         }
@@ -56,7 +56,9 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val itemId = backStackEntry.arguments?.getLong(AppScreen.Detail.ARG_ITEM_ID)
                                 ?: 0L
-                            ItemDetailScreen(itemId = itemId)
+                            ItemDetailScreen(itemId = itemId, onItemRemoved = {
+                                navController.popBackStack()
+                            })
                         }
                     }
                 }
