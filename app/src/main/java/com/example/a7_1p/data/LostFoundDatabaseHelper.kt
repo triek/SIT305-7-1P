@@ -1,6 +1,7 @@
 package com.example.a7_1p.data
 
 import android.content.Context
+import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
@@ -14,6 +15,93 @@ class LostFoundDatabaseHelper(context: Context) :
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_ITEMS")
         onCreate(db)
+    }
+
+    fun insertItem(item: LostFoundItem): Long {
+        val values = ContentValues().apply {
+            put(COLUMN_TYPE, item.type)
+            put(COLUMN_NAME, item.name)
+            put(COLUMN_PHONE, item.phone)
+            put(COLUMN_DESCRIPTION, item.description)
+            put(COLUMN_DATE, item.date)
+            put(COLUMN_LOCATION, item.location)
+            put(COLUMN_CATEGORY, item.category)
+            put(COLUMN_IMAGE_URI, item.imageUri)
+        }
+
+        return writableDatabase.insert(TABLE_ITEMS, null, values)
+    }
+
+    fun getAllItems(): List<LostFoundItem> {
+        val items = mutableListOf<LostFoundItem>()
+        val query = "SELECT * FROM $TABLE_ITEMS ORDER BY $COLUMN_ID DESC"
+
+        readableDatabase.rawQuery(query, null).use { cursor ->
+            val idIndex = cursor.getColumnIndexOrThrow(COLUMN_ID)
+            val typeIndex = cursor.getColumnIndexOrThrow(COLUMN_TYPE)
+            val nameIndex = cursor.getColumnIndexOrThrow(COLUMN_NAME)
+            val phoneIndex = cursor.getColumnIndexOrThrow(COLUMN_PHONE)
+            val descriptionIndex = cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)
+            val dateIndex = cursor.getColumnIndexOrThrow(COLUMN_DATE)
+            val locationIndex = cursor.getColumnIndexOrThrow(COLUMN_LOCATION)
+            val categoryIndex = cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)
+            val imageUriIndex = cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URI)
+
+            while (cursor.moveToNext()) {
+                items.add(
+                    LostFoundItem(
+                        id = cursor.getLong(idIndex),
+                        type = cursor.getString(typeIndex),
+                        name = cursor.getString(nameIndex),
+                        phone = cursor.getString(phoneIndex),
+                        description = cursor.getString(descriptionIndex),
+                        date = cursor.getString(dateIndex),
+                        location = cursor.getString(locationIndex),
+                        category = cursor.getString(categoryIndex),
+                        imageUri = cursor.getString(imageUriIndex)
+                    )
+                )
+            }
+        }
+
+        return items
+    }
+
+    fun getItemById(id: Long): LostFoundItem? {
+        val selection = "$COLUMN_ID = ?"
+        val selectionArgs = arrayOf(id.toString())
+
+        readableDatabase.query(
+            TABLE_ITEMS,
+            null,
+            selection,
+            selectionArgs,
+            null,
+            null,
+            null
+        ).use { cursor ->
+            if (!cursor.moveToFirst()) return null
+
+            return LostFoundItem(
+                id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE)),
+                description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
+                date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)),
+                location = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LOCATION)),
+                category = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
+                imageUri = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URI))
+            )
+        }
+    }
+
+    fun deleteItem(id: Long): Int {
+        return writableDatabase.delete(
+            TABLE_ITEMS,
+            "$COLUMN_ID = ?",
+            arrayOf(id.toString())
+        )
     }
 
     companion object {
