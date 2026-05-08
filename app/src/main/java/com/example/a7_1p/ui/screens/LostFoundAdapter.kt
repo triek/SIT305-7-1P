@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.a7_1p.R
+import com.example.a7_1p.data.DateTimeFormatterUtil
 import com.example.a7_1p.data.LostFoundItem
 
 class LostFoundAdapter(
@@ -45,7 +46,7 @@ class LostFoundAdapter(
             name.text = item.name
             type.text = "Type: ${item.type}"
             category.text = "Category: ${item.category}"
-            date.text = "Date/Time: ${item.date}"
+            date.text = "Posted: ${DateTimeFormatterUtil.formatForList(item.createdAtMillis)}"
 
             if (item.imageUri.isNotBlank() && item.imageUri != "selected-image-placeholder") {
                 preview.setImageURI(Uri.parse(item.imageUri))

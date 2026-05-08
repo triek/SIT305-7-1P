@@ -1,17 +1,26 @@
 package com.example.a7_1p
 
+import com.example.a7_1p.data.DateTimeFormatterUtil
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
-import org.junit.Assert.*
-
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun formattedDateTime_containsReadableParts() {
+        val now = System.currentTimeMillis()
+
+        val listFormatted = DateTimeFormatterUtil.formatForList(now)
+        val detailFormatted = DateTimeFormatterUtil.formatForDetail(now)
+
+        assertTrue(listFormatted.isNotBlank())
+        assertTrue(detailFormatted.contains(" at "))
+    }
+
+    @Test
+    fun newPostTimestamp_isRecent() {
+        val createdAt = System.currentTimeMillis()
+        val elapsedMillis = System.currentTimeMillis() - createdAt
+
+        assertTrue("Timestamp should be close to current time", elapsedMillis in 0..2_000)
     }
 }

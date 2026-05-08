@@ -52,7 +52,6 @@ fun CreatePostScreen(onPostSaved: () -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
-    var date by rememberSaveable { mutableStateOf("") }
     var location by rememberSaveable { mutableStateOf("") }
     var category by rememberSaveable { mutableStateOf(categories.first()) }
     var imageUri by rememberSaveable { mutableStateOf("") }
@@ -78,7 +77,6 @@ fun CreatePostScreen(onPostSaved: () -> Unit) {
         OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Item name*") }, isError = showErrors && name.isBlank(), modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Phone number*") }, isError = showErrors && phone.isBlank(), modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Description*") }, isError = showErrors && description.isBlank(), modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = date, onValueChange = { date = it }, label = { Text("Date/Time*") }, placeholder = { Text("e.g. 2026-05-07 14:30") }, isError = showErrors && date.isBlank(), modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = location, onValueChange = { location = it }, label = { Text("Location*") }, isError = showErrors && location.isBlank(), modifier = Modifier.fillMaxWidth())
 
         ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = { categoryExpanded = !categoryExpanded }) {
@@ -106,11 +104,11 @@ fun CreatePostScreen(onPostSaved: () -> Unit) {
 
         Button(onClick = {
             showErrors = true
-            val hasErrors = name.isBlank() || phone.isBlank() || description.isBlank() || date.isBlank() || location.isBlank()
+            val hasErrors = name.isBlank() || phone.isBlank() || description.isBlank() || location.isBlank()
             if (hasErrors) {
                 Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()
             } else {
-                databaseHelper.insertItem(LostFoundItem(type = type, name = name, phone = phone, description = description, date = date, location = location, category = category, imageUri = imageUri))
+                databaseHelper.insertItem(LostFoundItem(type = type, name = name, phone = phone, description = description, createdAtMillis = System.currentTimeMillis(), location = location, category = category, imageUri = imageUri))
                 Toast.makeText(context, "Post saved", Toast.LENGTH_SHORT).show()
                 onPostSaved()
             }

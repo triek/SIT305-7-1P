@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.a7_1p.R
+import com.example.a7_1p.data.DateTimeFormatterUtil
 import com.example.a7_1p.data.LostFoundDatabaseHelper
 
 @Composable
@@ -61,7 +62,7 @@ fun ItemDetailScreen(itemId: Long, onItemRemoved: () -> Unit) {
         Text("Type: ${currentItem.type}")
         Text("Description: ${currentItem.description}")
         Text("Phone: ${currentItem.phone}")
-        Text("Date/Time: ${currentItem.date}")
+        Text("Posted on: ${DateTimeFormatterUtil.formatForDetail(currentItem.createdAtMillis)}")
         Text("Location: ${currentItem.location}")
         Text("Category: ${currentItem.category}")
 

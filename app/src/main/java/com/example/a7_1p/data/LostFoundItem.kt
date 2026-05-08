@@ -6,7 +6,7 @@ data class LostFoundItem(
     val name: String,
     val phone: String,
     val description: String,
-    val date: String,
+    val createdAtMillis: Long,
     val location: String,
     val category: String,
     val imageUri: String
