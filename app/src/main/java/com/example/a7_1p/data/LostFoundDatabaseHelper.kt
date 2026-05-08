@@ -32,6 +32,21 @@ class LostFoundDatabaseHelper(context: Context) :
         return writableDatabase.insert(TABLE_ITEMS, null, values)
     }
 
+
+    fun insertItems(sampleItems: List<LostFoundItem>) {
+        writableDatabase.beginTransaction()
+        try {
+            sampleItems.forEach { insertItem(it) }
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
+    fun clearAllItems(): Int {
+        return writableDatabase.delete(TABLE_ITEMS, null, null)
+    }
+
     fun getAllItems(): List<LostFoundItem> {
         val items = mutableListOf<LostFoundItem>()
         val query = "SELECT * FROM $TABLE_ITEMS ORDER BY $COLUMN_ID DESC"

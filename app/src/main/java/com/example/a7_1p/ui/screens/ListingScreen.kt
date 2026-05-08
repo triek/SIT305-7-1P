@@ -1,5 +1,6 @@
 package com.example.a7_1p.ui.screens
 
+import com.example.a7_1p.BuildConfig
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +31,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.a7_1p.R
 import com.example.a7_1p.data.LostFoundDatabaseHelper
+import com.example.a7_1p.data.LostFoundItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +49,63 @@ fun ListingScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
     var categoryExpanded by remember { mutableStateOf(false) }
+
+    val sampleImageUri = "android.resource://${context.packageName}/${R.drawable.ic_launcher_foreground}"
+
+    val quickLostItem = LostFoundItem(
+        type = "Lost",
+        name = "Black Wallet",
+        phone = "0400000001",
+        description = "Lost near library with student card inside.",
+        createdAtMillis = System.currentTimeMillis(),
+        location = "Campus Library",
+        category = "Wallets",
+        imageUri = sampleImageUri
+    )
+
+    val quickFoundItem = LostFoundItem(
+        type = "Found",
+        name = "Silver Keys",
+        phone = "0400000002",
+        description = "Found set of two keys at cafeteria counter.",
+        createdAtMillis = System.currentTimeMillis() - 60_000,
+        location = "Campus Cafeteria",
+        category = "Keys",
+        imageUri = "placeholder-image-path"
+    )
+
+    val quickBulkItems = listOf(
+        LostFoundItem(
+            type = "Lost",
+            name = "Grey Backpack",
+            phone = "0400000003",
+            description = "Contains notebooks and a charger.",
+            createdAtMillis = System.currentTimeMillis() - 2 * 60_000,
+            location = "Engineering Building",
+            category = "Other",
+            imageUri = sampleImageUri
+        ),
+        LostFoundItem(
+            type = "Found",
+            name = "Bluetooth Earbuds",
+            phone = "0400000004",
+            description = "Found in lecture hall row C.",
+            createdAtMillis = System.currentTimeMillis() - 3 * 60_000,
+            location = "Lecture Hall 2",
+            category = "Electronics",
+            imageUri = ""
+        ),
+        LostFoundItem(
+            type = "Lost",
+            name = "Brown Dog",
+            phone = "0400000005",
+            description = "Small brown dog with red collar.",
+            createdAtMillis = System.currentTimeMillis() - 4 * 60_000,
+            location = "North Car Park",
+            category = "Pets",
+            imageUri = sampleImageUri
+        )
+    )
 
     val categoryOptions by remember {
         derivedStateOf {
@@ -94,6 +154,36 @@ fun ListingScreen(
         Text("Lost & Found", style = MaterialTheme.typography.headlineMedium)
         Button(onClick = onCreatePostClick) {
             Text("Create a post")
+        }
+
+        if (BuildConfig.DEBUG) {
+            Button(onClick = {
+                databaseHelper.insertItem(quickLostItem)
+                refreshItems()
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("Quick Add Lost Item")
+            }
+
+            Button(onClick = {
+                databaseHelper.insertItem(quickFoundItem)
+                refreshItems()
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("Quick Add Found Item")
+            }
+
+            Button(onClick = {
+                databaseHelper.insertItems(quickBulkItems)
+                refreshItems()
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("Quick Add Multiple Items")
+            }
+
+            Button(onClick = {
+                databaseHelper.clearAllItems()
+                refreshItems()
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("Clear Test Data")
+            }
         }
 
         OutlinedTextField(
