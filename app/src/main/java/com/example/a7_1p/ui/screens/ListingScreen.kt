@@ -3,6 +3,7 @@ package com.example.a7_1p.ui.screens
 import com.example.a7_1p.BuildConfig
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -49,6 +52,7 @@ fun ListingScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
     var categoryExpanded by remember { mutableStateOf(false) }
+    var controlsExpanded by remember { mutableStateOf(false) }
 
     val sampleImageUri = "android.resource://${context.packageName}/${R.drawable.ic_launcher_foreground}"
 
@@ -151,12 +155,21 @@ fun ListingScreen(
             .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Lost & Found", style = MaterialTheme.typography.headlineMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Lost & Found", style = MaterialTheme.typography.headlineMedium)
+            IconButton(onClick = { controlsExpanded = !controlsExpanded }) {
+                Text("☰")
+            }
+        }
         Button(onClick = onCreatePostClick) {
             Text("Create a post")
         }
 
-        if (BuildConfig.DEBUG) {
+        if (controlsExpanded && BuildConfig.DEBUG) {
             Button(onClick = {
                 databaseHelper.insertItem(quickLostItem)
                 refreshItems()
@@ -186,18 +199,19 @@ fun ListingScreen(
             }
         }
 
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            label = { Text("Search items") },
-            placeholder = { Text("Name, description, or location") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (controlsExpanded) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Search items") },
+                placeholder = { Text("Name, description, or location") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        ExposedDropdownMenuBox(
-            expanded = categoryExpanded,
-            onExpandedChange = { categoryExpanded = !categoryExpanded }
-        ) {
+            ExposedDropdownMenuBox(
+                expanded = categoryExpanded,
+                onExpandedChange = { categoryExpanded = !categoryExpanded }
+            ) {
             OutlinedTextField(
                 value = selectedCategory,
                 onValueChange = {},
@@ -224,14 +238,15 @@ fun ListingScreen(
             }
         }
 
-        Button(
-            onClick = {
-                searchQuery = ""
-                selectedCategory = "All"
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Clear filters")
+            Button(
+                onClick = {
+                    searchQuery = ""
+                    selectedCategory = "All"
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Clear filters")
+            }
         }
 
         if (filteredItems.isEmpty()) {
