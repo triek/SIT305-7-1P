@@ -1,6 +1,4 @@
 
-
-
 package com.example.a7_1p
 
 import com.example.a7_1p.data.DateTimeFormatterUtil
